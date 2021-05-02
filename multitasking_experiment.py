@@ -1,119 +1,86 @@
-import expyriment
 
-exp = expyriment.design.Experiment(name="Are women better than men at multi-tasking")
-expyriment.control.initialize(exp)
+from expyriment import design, control, stimuli, io, misc
+import random
+
+WHITE = (255, 255, 255)
+BLACK = (0, 0, 0)
+
+SHAPE_TASK_RECTANGLE = misc.constants.K_RIGHT
+SHAPE_TASK_DIAMOND = misc.constants.K_LEFT
+FILLING_TASK_TWODOTS = misc.constants.K_RIGHT
+FILLING_TASK_THREEDOTS =misc.constants.K_LEFT
+
+exp = design.Experiment(name = "Stoet's Multi-tasking experiment",
+                        background_colour = WHITE, 
+                        foreground_colour = BLACK)
+control.initialize(exp)
+
+#fixation_cross = stimuli.FixCross()
+#fixation_cross.preload()
+blankscreen = stimuli.BlankScreen(colour = WHITE)
+
+# Create IO
+#response_device = io.EventButtonBox(io.SerialPort("/dev/ttyS1"))
+response_device = exp.keyboard
+
+# Create design
+for task in ["shape_only", "filling_only"]:
+    b = design.Block()
+    b.set_factor("task_type", task)
+    if task == "shape_only":
+        for shape in ["Rectangle", "Diamond"]:
+            if shape == "Rectangle":
+                for filling in [["two_dots", "S_R_2.png"], ["three_dots", "S_R_3.png"]]:
+                    t = design.Trial()
+                    t.set_factor("Shape", shape)
+                    t.set_factor("Filling", filling[0])
+                    s = stimuli.Picture(filling[1])
+                    t.add_stimulus(s)
+                    b.add_trial(t, copies=20)
+            else:
+                for filling in [["two_dots", "S_D_2.png"], ["three_dots", "S_D_3.png"]]:
+                    t = design.Trial()
+                    t.set_factor("Shape", shape)
+                    t.set_factor("Filling", filling[0])
+                    s = stimuli.Picture(filling[1])
+                    t.add_stimulus(s)
+                    b.add_trial(t, copies=20)
+    else:
+        for filling in ["two_dots", "three_dots"]:
+            if filling == "two_dots":
+                for shape in [["Rectangle", "F_R_2.png"], ["Diamond", "F_D_2.png"]]:
+                    t = design.Trial()
+                    t.set_factor("Filling", filling)
+                    t.set_factor("Shape", shape[0])
+                    s = stimuli.Picture(shape[1])
+                    t.add_stimulus(s)
+                    b.add_trial(t, copies=20)
+            else:
+                for shape in [["Rectangle", "F_R_3.png"], ["Diamond", "F_D_3.png"]]:
+                    t = design.Trial()
+                    t.set_factor("Filling", filling)
+                    t.set_factor("Shape", shape[0])
+                    s = stimuli.Picture(shape[1])
+                    t.add_stimulus(s)
+                    b.add_trial(t, copies=20)        
+    b.shuffle_trials()
+    exp.add_block(b)
+exp.add_bws_factor("ResponseMapping", [1, 2])
+exp.data_variable_names = ["Position", "Button", "RT"]
 
 
-block_one = expyriment.design.Block(name="only shape block")
-
-trial_one = expyriment.design.Trial()
-stim = expyriment.stimuli.Picture("shape_diamond_three.png")
-stim.preload()
-trial_one.add_stimulus(stim)
-
-trial_two = expyriment.design.Trial()
-stim = expyriment.stimuli.Picture("shape_diamond_two.png")
-trial_two.add_stimulus(stim)
-
-trial_three= expyriment.design.Trial()
-stim = expyriment.stimuli.Picture("shape_rectangle_three.png")
-trial_three.add_stimulus(stim)
-
-trial_four = expyriment.design.Trial()
-stim = expyriment.stimuli.Picture("shape_rectangle_two.png")
-trial_four.add_stimulus(stim)
-
-block_one.add_trial(trial_one)
-block_one.add_trial(trial_two)
-block_one.add_trial(trial_three)
-block_one.add_trial(trial_four)
-
-exp.add_block(block_one)
-block_one.shuffle_trials()
-
-block_two = expyriment.design.Block(name="only filling block")
-
-trial_one = expyriment.design.Trial()
-stim = expyriment.stimuli.Picture("filling_diamond_three.png")
-stim.preload()
-trial_one.add_stimulus(stim)
-
-trial_two = expyriment.design.Trial()
-stim = expyriment.stimuli.Picture("filling_diamond_two.png")
-trial_two.add_stimulus(stim)
-
-trial_three= expyriment.design.Trial()
-stim = expyriment.stimuli.Picture("filling_rectangle_three.png")
-trial_three.add_stimulus(stim)
-
-trial_four = expyriment.design.Trial()
-stim = expyriment.stimuli.Picture("filling_rectangle_two.png")
-trial_four.add_stimulus(stim)
-
-block_two.add_trial(trial_one)
-block_two.add_trial(trial_two)
-block_two.add_trial(trial_three)
-block_two.add_trial(trial_four)
-
-exp.add_block(block_two)
-block_two.shuffle_trials()
-
-block_three = expyriment.design.Block(name="shape and filling block")
-
-trial_one = expyriment.design.Trial()
-stim = expyriment.stimuli.Picture("shape_diamond_three.png")
-stim.preload()
-trial_one.add_stimulus(stim)
-
-trial_two = expyriment.design.Trial()
-stim = expyriment.stimuli.Picture("shape_diamond_two.png")
-trial_two.add_stimulus(stim)
-
-trial_three= expyriment.design.Trial()
-stim = expyriment.stimuli.Picture("shape_rectangle_three.png")
-trial_three.add_stimulus(stim)
-
-trial_four = expyriment.design.Trial()
-stim = expyriment.stimuli.Picture("shape_rectangle_two.png")
-trial_four.add_stimulus(stim)
-
-trial_five = expyriment.design.Trial()
-stim = expyriment.stimuli.Picture("filling_diamond_three.png")
-stim.preload()
-trial_one.add_stimulus(stim)
-
-trial_six = expyriment.design.Trial()
-stim = expyriment.stimuli.Picture("filling_diamond_two.png")
-trial_two.add_stimulus(stim)
-
-trial_seven= expyriment.design.Trial()
-stim = expyriment.stimuli.Picture("filling_rectangle_three.png")
-trial_three.add_stimulus(stim)
-
-trial_eight = expyriment.design.Trial()
-stim = expyriment.stimuli.Picture("filling_rectangle_two.png")
-trial_four.add_stimulus(stim)
-
-block_three.add_trial(trial_one)
-block_three.add_trial(trial_two)
-block_three.add_trial(trial_three)
-block_three.add_trial(trial_four)
-block_three.add_trial(trial_five)
-block_three.add_trial(trial_six)
-block_three.add_trial(trial_seven)
-block_three.add_trial(trial_eight)
-
-exp.add_block(block_three)
-block_three.shuffle_trials()
-
-expyriment.control.start()
-
+# Start Experiment
+control.start()
+exp.permute_blocks(misc.constants.P_BALANCED_LATIN_SQUARE)
 for block in exp.blocks:
+    stimuli.TextScreen("Instructions", block.get_factor("task_type")).present()
+    response_device.wait()
     for trial in block.trials:
+        fixation_cross.present()
+        exp.clock.wait(1000 - trial.stimuli[0].preload())
         trial.stimuli[0].present()
-        key, rt = exp.keyboard.wait([expyriment.misc.constants.K_LEFT,
-                                     expyriment.misc.constants.K_RIGHT])
-        exp.data.add([block.name, trial.id, key, rt])
+        button, rt = response_device.wait()
+        exp.data.add([trial.get_factor("Shape"), button, rt])
 
-expyriment.control.end()
-
+# End Experiment
+control.end()
