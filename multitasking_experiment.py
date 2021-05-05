@@ -10,7 +10,7 @@ SHAPE_TASK_RECTANGLE = misc.constants.K_RIGHT
 SHAPE_TASK_DIAMOND = misc.constants.K_LEFT
 FILLING_TASK_TWODOTS = misc.constants.K_LEFT
 FILLING_TASK_THREEDOTS = misc.constants.K_RIGHT
-BLOCK_NAMES = ["shape only block","filling only block"]
+BLOCK_NAMES = ["shape only block","filling only block", "mixed block"]
 ABOVE_SHAPE_CATEGORIES = ["rectangle", "diamond"]
 BELOW_FILLING_CATEGORIES = ["two_dots", "three_dots"]
 TRANING_EXPERIMENTAL_TRIALS = [10, 20]
@@ -74,21 +74,40 @@ for N_TRIAL in TRANING_EXPERIMENTAL_TRIALS:
                 if above_shape == "rectangle":
                     for filling in [["two_dots", "S_R_2.png"], ["three_dots", "S_R_3.png"]]:
                         t = trial_generator("filling")
-                        b.add_trial(t, copies= N_TRIAL)
+                        b.add_trial(t, copies= (N_TRIAL))
                 else:
                     for filling in [["two_dots", "S_D_2.png"], ["three_dots", "S_D_3.png"]]:
                         t = trial_generator("filling")
-                        b.add_trial(t, copies= N_TRIAL)
+                        b.add_trial(t, copies= (N_TRIAL))
         elif task == "filling only block":
             for below_filling in BELOW_FILLING_CATEGORIES:
                 if below_filling == "two_dots":
                     for shape in [["rectangle", "F_R_2.png"], ["diamond", "F_D_2.png"]]:
                         t = trial_generator("shape")
-                        b.add_trial(t, copies= N_TRIAL)
+                        b.add_trial(t, copies= (N_TRIAL))
                 else:
                     for shape in [["rectangle", "F_R_3.png"], ["diamond", "F_D_3.png"]]:
                         t = trial_generator("shape")
-                        b.add_trial(t, copies= N_TRIAL)
+                        b.add_trial(t, copies= (N_TRIAL))
+        elif task == "mixed block":
+            for above_shape in ABOVE_SHAPE_CATEGORIES:
+                if above_shape == "rectangle":
+                    for filling in [["two_dots", "S_R_2.png"], ["three_dots", "S_R_3.png"]]:
+                        t = trial_generator("filling")
+                        b.add_trial(t, copies= (N_TRIAL)//2)
+                else:
+                    for filling in [["two_dots", "S_D_2.png"], ["three_dots", "S_D_3.png"]]:
+                        t = trial_generator("filling")
+                        b.add_trial(t, copies= (N_TRIAL)//2)
+            for below_filling in BELOW_FILLING_CATEGORIES:
+                if below_filling == "two_dots":
+                    for shape in [["rectangle", "F_R_2.png"], ["diamond", "F_D_2.png"]]:
+                        t = trial_generator("shape")
+                        b.add_trial(t, copies= (N_TRIAL)//2)
+                else:
+                    for shape in [["rectangle", "F_R_3.png"], ["diamond", "F_D_3.png"]]:
+                        t = trial_generator("shape")
+                        b.add_trial(t, copies= (N_TRIAL)//2)
         b.shuffle_trials()
         exp.add_block(b)
 
@@ -96,7 +115,6 @@ control.start(skip_ready_screen = True)
 stimuli.TextScreen("Instructions", INSTRUCTIONS).present()
 exp.keyboard.wait_char(" ")
 
-exp.permute_blocks(misc.constants.P_BALANCED_LATIN_SQUARE)
 for block in exp.blocks:
     stimuli.TextScreen("Instructions", block.get_factor("task_type")).present()
     exp.keyboard.wait(duration = ITI)
@@ -116,6 +134,15 @@ for block in exp.blocks:
                 is_correct = (button == FILLING_TASK_TWODOTS)
             elif trial.get_factor("filling") == "three_dots":
                 is_correct = (button == FILLING_TASK_THREEDOTS)
+        elif block.get_factor("task_type") == "mixed block":
+            if trial.get_factor("shape") == "rectangle":
+                is_correct = (button == SHAPE_TASK_RECTANGLE)
+            elif trial.get_factor("shape") == "diamond":
+                is_correct = (button == SHAPE_TASK_DIAMOND)
+            if trial.get_factor("filling") == "two_dots":
+                is_correct = (button == FILLING_TASK_TWODOTS)
+            elif trial.get_factor("filling") == "three_dots":
+                is_correct = (button == FILLING_TASK_THREEDOTS)   
         if not is_correct:
             error_beep.present()
             stimuli.TextScreen("Instructions", ERROR_MESSAGE).present()
